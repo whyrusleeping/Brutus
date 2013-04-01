@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/skein"
+	"runtime"
 	"fmt"
 	"encoding/hex"
 	"math/rand"
@@ -23,11 +24,11 @@ func DifHash(a, good []byte) int {
 			r = r >> 1
 		}
 	}
-	return sum
+	return 1024 - sum
 }
 
 func makeSampleString() []byte {
-	b := make([]byte, 62)
+	b := make([]byte, 128)
 	k := 0
 	i := 'a'
 	for ; i <= 'z'; i++ {
@@ -42,7 +43,49 @@ func makeSampleString() []byte {
 		b[k] = byte(i)
 		k++
 	}
-	return b
+	b[k] = '!'
+	k++
+	b[k] = '@'
+	k++
+	b[k] = '#'
+	k++
+	b[k] = '$'
+	k++
+	b[k] = '%'
+	k++
+	b[k] = '^'
+	k++
+	b[k] = '&'
+	k++
+	b[k] = '*'
+	k++
+	b[k] = '('
+	k++
+	b[k] = ')'
+	k++
+	b[k] = '-'
+	k++
+	b[k] = '_'
+	k++
+	b[k] = '='
+	k++
+	b[k] = '+'
+	k++
+	b[k] = '\''
+	k++
+	b[k] = '.'
+	k++
+	b[k] = ','
+	k++
+	b[k] = '<'
+	k++
+	b[k] = '>'
+	k++
+	b[k] = '/'
+	k++
+	b[k] = '?'
+	k++
+	return b[:k]
 }
 
 func RandString(l int, dict []byte) []byte {
@@ -61,9 +104,10 @@ func DiffFromString(gs , s []byte) int {
 }
 
 func main() {
+	runtime.GOMAXPROCS(4)
 	THEGOOD,_ := hex.DecodeString("5b4da95f5fa08280fc9879df44f418c8f9f12ba424b7757de02bbdfbae0d4c4fdf9317c80cc5fe04c6429073466cf29706b8c25999ddd2f6540d4475cc977b87f4757be023f19b8f4035d7722886b78869826de916a79cf9c94cc79cd4347d24b567aa3e2390a573a373a48a5e676640c79cc70197e1c5e7f902fb53ca1858b6")
 	ds := makeSampleString()
-	record := 416
+	record := 1024
 	for {
 		rs := RandString(rand.Intn(16), ds)
 		dnum := DiffFromString(THEGOOD, rs)
@@ -72,4 +116,6 @@ func main() {
 			record = dnum
 		}
 	}	
+	fmt.Println("Stop?")
+	for {}
 }
