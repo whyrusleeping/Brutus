@@ -23,35 +23,34 @@ const (
 func DifHash(a, good []byte) int {
 	sum := 0
 	for i := 0; i < len(a); i++ {
-		l := a[i]
-		r := good[i]
+		r := a[i] ^ good[i]
 
-		if l & A == r & A {
+		if r & A != 0 {
 			sum++
 		}
-		if l & B == r & B {
+		if r & B != 0 {
 			sum++
 		}
-		if l & C == r & C {
+		if r & C != 0 {
 			sum++
 		}
-		if l & D == r & D {
+		if r & D != 0 {
 			sum++
 		}
-		if l & E == r & E {
+		if r & E != 0 {
 			sum++
 		}
-		if l & F == r & F {
+		if r & F != 0 {
 			sum++
 		}
-		if l & G == r & G {
+		if r & G != 0 {
 			sum++
 		}
-		if l & H == r & H {
+		if r & H != 0 {
 			sum++
 		}
 	}
-	return 1024 - sum
+	return sum
 }
 
 func makeSampleString() []byte {
