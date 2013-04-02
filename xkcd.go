@@ -2,13 +2,11 @@ package main
 
 import (
 	"crypto/skein"
-	"runtime"
 	"fmt"
 	"encoding/hex"
 	"math/rand"
 	"time"
 )
-
 func DifHash(a, good []byte) int {
 	sum := 0
 	for i := 0; i < len(a); i++ {
@@ -91,12 +89,10 @@ func makeSampleString() []byte {
 	return b[:k]
 }
 
-func RandString(l int, dict []byte) []byte {
-	s := make([]byte, l)
+func RandString(l int, dict []byte, ret []byte) {
 	for i := 0; i < l; i++ {
-		s[i] = dict[rand.Intn(len(dict))]
+		ret[i] = dict[rand.Intn(len(dict))]
 	}
-	return s
 }
 
 func DiffFromString(gs , s []byte) int {
@@ -106,20 +102,31 @@ func DiffFromString(gs , s []byte) int {
 	return DifHash(m, gs)
 }
 
+func Brute(num int, check, dict []byte) {
+	buff := make([]byte, 32)
+	t := time.Now()
+	record := 1024
+	count := int64(0)
+	for count < 1000000 {
+		if count % 1000000 == 0 {
+			d := float64(time.Now().Unix() - t.Unix()) + 0.00001
+			fmt.Println(float64(count) / d)
+		}
+		n := rand.Intn(32)
+		buff = buff[:n]
+		RandString(n, dict, buff)
+		dnum := DiffFromString(check, buff)
+		if dnum < record {
+			fmt.Printf("%d: %s %d\n", num, buff, dnum)
+			record = dnum
+		}
+		count++
+	}
+}
+
 func main() {
-	runtime.GOMAXPROCS(4)
 	rand.Seed(time.Now().Unix())
 	THEGOOD,_ := hex.DecodeString("5b4da95f5fa08280fc9879df44f418c8f9f12ba424b7757de02bbdfbae0d4c4fdf9317c80cc5fe04c6429073466cf29706b8c25999ddd2f6540d4475cc977b87f4757be023f19b8f4035d7722886b78869826de916a79cf9c94cc79cd4347d24b567aa3e2390a573a373a48a5e676640c79cc70197e1c5e7f902fb53ca1858b6")
 	ds := makeSampleString()
-	record := 1024
-	for {
-		rs := RandString(rand.Intn(16), ds)
-		dnum := DiffFromString(THEGOOD, rs)
-		if dnum < record {
-			fmt.Printf("%s %d\n", rs, dnum)
-			record = dnum
-		}
-	}	
-	fmt.Println("Stop?")
-	for {}
+	Brute(0, THEGOOD, ds)
 }
