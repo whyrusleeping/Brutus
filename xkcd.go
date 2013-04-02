@@ -108,14 +108,15 @@ func DiffFromString(gs , s []byte) int {
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
 	buff := make([]byte, 32)
-	t := time.Now()
+	//t := time.Now()
 	record := 1024
 	count := int64(0)
 	for {
+		/*
 		if count % 1000000 == 0 {
 			d := float64(time.Now().Unix() - t.Unix()) + 0.00001
 			fmt.Println(float64(count) / d)
-		}
+		}*/
 		n := rand.Intn(32)
 		buff = buff[:n]
 		RandString(n, dict, buff)
