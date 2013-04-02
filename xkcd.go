@@ -90,7 +90,7 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 }
 
 func SendToEric(word string, num int) {
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
 	conn, _ := net.DialTCP("tcp", nil,addr)
 	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
 	conn.Close()
