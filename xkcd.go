@@ -93,7 +93,7 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 }
 
 func SendToEric(word string, num int) {
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
 	conn, _ := net.DialTCP("tcp", nil,addr)
 	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
 	conn.Close()
@@ -101,12 +101,13 @@ func SendToEric(word string, num int) {
 
 func RequestNewRange() (*big.Int, *big.Int) {
 	//return big.NewInt(5000000000), big.NewInt(5002000000)
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
 	conn, _ := net.DialTCP("tcp", nil,addr)
 	conn.Write([]byte("ask"))
 	rbuf := make([]byte, 2)
 	conn.Read(rbuf)
-	m := make([]byte, int(rbuf[0]) + (int(rbuf[1]) * 256))
+	l := int(rbuf[0]) + (int(rbuf[1]) * 256)
+	m := make([]byte, l)
 	conn.Read(m)
 	conn.Close()
 	rng := strings.Split(string(m),";")
@@ -114,14 +115,13 @@ func RequestNewRange() (*big.Int, *big.Int) {
 	lo.SetString(rng[0],10)
 	hi := big.NewInt(0)
 	hi.SetString(rng[1],10)
-	fmt.Printf("Now checking range %s to %s\n.", lo.String(), hi.String())
+	fmt.Printf("Now checking range %s to %s.\n", lo.String(), hi.String())
 	return lo, hi
 }
 
 func SchedBrute(check []byte) {
-	
 	buff := make([]byte, 64)
-	t := time.Now()
+	//t := time.Now()
 	count := int64(1)
 	record := 1024
 	b, _ := skein.New(skein.Skein1024, 1024)
@@ -132,11 +132,11 @@ func SchedBrute(check []byte) {
 	ttrim[1] = '='
 	trimset := string(ttrim)
 	for {
+		/*
 		if count % 1000000 == 0 {
 			fmt.Println(1000000.0 / (float64(time.Now().UnixNano() - t.UnixNano()) / 1000000000.0))
 			t = time.Now()
-		}
-		//MAKE STRING HERE
+		}*/
 		by := lo.Bytes()
 		base64.StdEncoding.Encode(buff, by)
 		subbuff := bytes.TrimRight(buff, trimset)
