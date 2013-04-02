@@ -7,7 +7,10 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"time"
-	//"runtime"
+	"math/big"
+	"strings"
+	"encoding/base64"
+	"bytes"
 )
 
 const (
@@ -96,19 +99,76 @@ func SendToEric(word string, num int) {
 	conn.Close()
 }
 
+func RequestNewRange() (*big.Int, *big.Int) {
+	//return big.NewInt(5000000000), big.NewInt(5002000000)
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
+	conn, _ := net.DialTCP("tcp", nil,addr)
+	conn.Write([]byte("ask"))
+	rbuf := make([]byte, 256)
+	n,_ := conn.Read(rbuf)
+	rbuf = rbuf[:n]
+	conn.Close()
+	rng := strings.Split(string(rbuf),";")
+	lo := big.NewInt(0)
+	lo.SetString(rng[0],10)
+	hi := big.NewInt(0)
+	hi.SetString(rng[1],10)
+	return lo, hi
+}
+
+func SchedBrute(check []byte) {
+	
+	buff := make([]byte, 64)
+	t := time.Now()
+	count := int64(1)
+	record := 1024
+	b, _ := skein.New(skein.Skein1024, 1024)
+	lo, hi := RequestNewRange()
+	one := big.NewInt(1)
+	ttrim := make([]byte, 2)
+	ttrim[0] = 0
+	ttrim[1] = '='
+	trimset := string(ttrim)
+	for {
+		if count % 1000000 == 0 {
+			fmt.Println(1000000.0 / (float64(time.Now().UnixNano() - t.UnixNano()) / 1000000000.0))
+			t = time.Now()
+		}
+		//MAKE STRING HERE
+		by := lo.Bytes()
+		base64.StdEncoding.Encode(buff, by)
+		subbuff := bytes.TrimRight(buff, trimset)
+
+		//
+		dnum := DiffFromString(b, check, subbuff)
+		if dnum < record {
+			entry := string(subbuff)
+			fmt.Printf("%d: %s %d\n", count, entry, dnum)
+			SendToEric(entry, dnum)
+
+			record = dnum
+		}
+		if lo.Cmp(hi) == 0 {
+			lo, hi = RequestNewRange()
+		} else {
+			lo.Add(lo, one)
+		}
+		count++
+	}
+}
+
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
 	buff := make([]byte, 64)
-	//t := time.Now()
+	t := time.Now()
 	record := 1024
 	count := int64(1)
 	b, _ := skein.New(skein.Skein1024, 1024)
 	for {
-		/*
 		if count % 1000000 == 0 {
-			fmt.Println(float64(1000000) / float64(time.Now().Unix() - t.Unix()))
+			fmt.Println(1000000.0 / (float64(time.Now().UnixNano() - t.UnixNano()) / 1000000000.0))
 			t = time.Now()
-		}*/
+		}
 		n := rand.Intn(64)
 		buff = buff[:n]
 		RandString(n, dict, buff)
@@ -116,7 +176,7 @@ func Brute(num int, check, dict []byte) {
 		if dnum < record {
 			entry := string(buff)
 			fmt.Printf("%d: %s %d\n", count, entry, dnum)
-			SendToEric(entry, dnum)
+			//SendToEric(entry, dnum)
 			record = dnum
 		}
 		count++
@@ -124,9 +184,8 @@ func Brute(num int, check, dict []byte) {
 }
 
 func main() {
-	//runtime.GOMAXPROCS(8)
-	rand.Seed(time.Now().Unix())
+	rand.Seed(time.Now().UnixNano())
 	THEGOOD,_ := hex.DecodeString("5b4da95f5fa08280fc9879df44f418c8f9f12ba424b7757de02bbdfbae0d4c4fdf9317c80cc5fe04c6429073466cf29706b8c25999ddd2f6540d4475cc977b87f4757be023f19b8f4035d7722886b78869826de916a79cf9c94cc79cd4347d24b567aa3e2390a573a373a48a5e676640c79cc70197e1c5e7f902fb53ca1858b6")
-	ds := makeSampleString()
-	Brute(0, THEGOOD, ds)
+	//ds := makeSampleString()
+	SchedBrute(THEGOOD)
 }
