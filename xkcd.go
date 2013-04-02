@@ -106,7 +106,7 @@ func RequestNewRange() (*big.Int, *big.Int) {
 	conn.Write([]byte("ask"))
 	rbuf := make([]byte, 2)
 	conn.Read(rbuf)
-	m := make([]byte, m[0] + (m[1] * 256))
+	m := make([]byte, int(rbuf[0]) + (int(rbuf[1]) * 256))
 	conn.Read(m)
 	conn.Close()
 	rng := strings.Split(string(m),";")
