@@ -1,4 +1,4 @@
-XKCD
+Brutus
 ====
 
 Go Cougs
