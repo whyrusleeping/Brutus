@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/whyrusleeping/GoSkein"
+	"net"
 	"fmt"
 	"encoding/hex"
 	"math/rand"
@@ -62,6 +63,12 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 	return r
 }
 
+func SendToEric(word []byte, num int) {
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
+	conn, _ := net.DialTCP("tcp", nil,addr)
+	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
+}
+
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
 	buff := make([]byte, 32)
@@ -82,6 +89,7 @@ func Brute(num int, check, dict []byte) {
 		dnum := DiffFromString(b, check, buff)
 		if dnum < record {
 			fmt.Printf("%d: %s %d\n", count, buff, dnum)
+			SendToEric(buff, dnum)
 			record = dnum
 		}
 		count++
