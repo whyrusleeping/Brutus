@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/skein"
+	"github.com/whyrusleeping/GoSkein"
 	"fmt"
 	"encoding/hex"
 	"math/rand"
@@ -45,50 +45,6 @@ func makeSampleString() []byte {
 		b[k] = byte(i)
 		k++
 	}
-	/*
-	b[k] = '!'
-	k++
-	b[k] = '@'
-	k++
-	b[k] = '#'
-	k++
-	b[k] = '$'
-	k++
-	b[k] = '%'
-	k++
-	b[k] = '^'
-	k++
-	b[k] = '&'
-	k++
-	b[k] = '*'
-	k++
-	b[k] = '('
-	k++
-	b[k] = ')'
-	k++
-	b[k] = '-'
-	k++
-	b[k] = '_'
-	k++
-	b[k] = '='
-	k++
-	b[k] = '+'
-	k++
-	b[k] = '\''
-	k++
-	b[k] = '.'
-	k++
-	b[k] = ','
-	k++
-	b[k] = '<'
-	k++
-	b[k] = '>'
-	k++
-	b[k] = '/'
-	k++
-	b[k] = '?'
-	k++
-	*/
 	return b[:k]
 }
 
@@ -98,31 +54,32 @@ func RandString(l int, dict []byte, ret []byte) {
 	}
 }
 
-func DiffFromString(gs , s []byte) int {
-	b, _ := skein.New(skein.Skein1024, 1024)
+func DiffFromString(b *skein.Skein, gs , s []byte) int {
 	b.Write(s)
 	m := b.DoFinal()
-	return DifHash(m, gs)
+	r := DifHash(m, gs)
+	skein.FreeBuf(m)
+	return r
 }
 
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
 	buff := make([]byte, 32)
-	//t := time.Now()
+	t := time.Now()
 	record := 1024
-	count := int64(0)
+	count := int64(1)
+	b, _ := skein.New(skein.Skein1024, 1024)
 	for {
-		/*
 		if count % 1000000 == 0 {
-			d := float64(time.Now().Unix() - t.Unix()) + 0.00001
-			fmt.Println(float64(count) / d)
-		}*/
+			fmt.Println(float64(1000000) / float64(time.Now().Unix() - t.Unix()))
+			t = time.Now()
+		}
 		n := rand.Intn(32)
 		buff = buff[:n]
 		RandString(n, dict, buff)
-		dnum := DiffFromString(check, buff)
+		dnum := DiffFromString(b, check, buff)
 		if dnum < record {
-			fmt.Printf("%d: %s %d\n", num, buff, dnum)
+			fmt.Printf("%d: %s %d\n", count, buff, dnum)
 			record = dnum
 		}
 		count++
