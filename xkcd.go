@@ -65,15 +65,17 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
 	buff := make([]byte, 32)
-	t := time.Now()
+	//t := time.Now()
 	record := 1024
 	count := int64(1)
 	b, _ := skein.New(skein.Skein1024, 1024)
 	for {
+		/*
 		if count % 1000000 == 0 {
 			fmt.Println(float64(1000000) / float64(time.Now().Unix() - t.Unix()))
 			t = time.Now()
 		}
+		*/
 		n := rand.Intn(32)
 		buff = buff[:n]
 		RandString(n, dict, buff)
