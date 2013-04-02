@@ -46,6 +46,10 @@ func makeSampleString() []byte {
 		b[k] = byte(i)
 		k++
 	}
+	b[k] = '~'
+	k++
+	b[k] = '.'
+	k++
 	return b[:k]
 }
 
@@ -67,11 +71,12 @@ func SendToEric(word []byte, num int) {
 	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
 	conn, _ := net.DialTCP("tcp", nil,addr)
 	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
+	conn.Close()
 }
 
 func Brute(num int, check, dict []byte) {
 	//runtime.LockOSThread()
-	buff := make([]byte, 32)
+	buff := make([]byte, 64)
 	//t := time.Now()
 	record := 1024
 	count := int64(1)
@@ -83,7 +88,7 @@ func Brute(num int, check, dict []byte) {
 			t = time.Now()
 		}
 		*/
-		n := rand.Intn(32)
+		n := rand.Intn(32) + 32
 		buff = buff[:n]
 		RandString(n, dict, buff)
 		dnum := DiffFromString(b, check, buff)
