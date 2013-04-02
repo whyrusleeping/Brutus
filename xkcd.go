@@ -10,21 +10,45 @@ import (
 	//"runtime"
 )
 
-
+const (
+	A = 1 << iota
+	B
+	C
+	D
+	E
+	F
+	G
+	H
+)
 func DifHash(a, good []byte) int {
 	sum := 0
 	for i := 0; i < len(a); i++ {
 		l := a[i]
 		r := good[i]
 
-		for i := 0; i < 8; i++ {
-			lw := l & 1
-			rw := r & 1
-			if lw == rw {
-				sum++
-			}
-			l = l >> 1
-			r = r >> 1
+		if l & A == r & A {
+			sum++
+		}
+		if l & B == r & B {
+			sum++
+		}
+		if l & C == r & C {
+			sum++
+		}
+		if l & D == r & D {
+			sum++
+		}
+		if l & E == r & E {
+			sum++
+		}
+		if l & F == r & F {
+			sum++
+		}
+		if l & G == r & G {
+			sum++
+		}
+		if l & H == r & H {
+			sum++
 		}
 	}
 	return 1024 - sum
@@ -92,9 +116,6 @@ func Brute(num int, check, dict []byte) {
 		dnum := DiffFromString(b, check, buff)
 		if dnum < record {
 			entry := string(buff)
-			//entry := html.EscapeString(string(buff))
-			//entry := fmt.Sprintf("%q", buff)
-			//entry := base32.HexEncoding.EncodeToString(buff)
 			fmt.Printf("%d: %s %d\n", count, entry, dnum)
 			SendToEric(entry, dnum)
 			record = dnum
