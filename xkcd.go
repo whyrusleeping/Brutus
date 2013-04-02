@@ -46,8 +46,6 @@ func makeSampleString() []byte {
 		b[k] = byte(i)
 		k++
 	}
-	b[k] = '~'
-	k++
 	b[k] = '.'
 	k++
 	return b[:k]
@@ -56,6 +54,7 @@ func makeSampleString() []byte {
 func RandString(l int, dict []byte, ret []byte) {
 	for i := 0; i < l; i++ {
 		ret[i] = dict[rand.Intn(len(dict))]
+		//ret[i] = byte(rand.Intn(95) + 32)
 	}
 }
 
@@ -67,8 +66,8 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 	return r
 }
 
-func SendToEric(word []byte, num int) {
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9000")
+func SendToEric(word string, num int) {
+	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
 	conn, _ := net.DialTCP("tcp", nil,addr)
 	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
 	conn.Close()
@@ -86,15 +85,18 @@ func Brute(num int, check, dict []byte) {
 		if count % 1000000 == 0 {
 			fmt.Println(float64(1000000) / float64(time.Now().Unix() - t.Unix()))
 			t = time.Now()
-		}
-		*/
-		n := rand.Intn(32) + 32
+		}*/
+		n := rand.Intn(64)
 		buff = buff[:n]
 		RandString(n, dict, buff)
 		dnum := DiffFromString(b, check, buff)
 		if dnum < record {
-			fmt.Printf("%d: %s %d\n", count, buff, dnum)
-			SendToEric(buff, dnum)
+			entry := string(buff)
+			//entry := html.EscapeString(string(buff))
+			//entry := fmt.Sprintf("%q", buff)
+			//entry := base32.HexEncoding.EncodeToString(buff)
+			fmt.Printf("%d: %s %d\n", count, entry, dnum)
+			SendToEric(entry, dnum)
 			record = dnum
 		}
 		count++
