@@ -121,7 +121,7 @@ func RequestNewRange() (*big.Int, *big.Int) {
 
 func SchedBrute(check []byte) {
 	buff := make([]byte, 64)
-	//t := time.Now()
+	t := time.Now()
 	count := int64(1)
 	record := 1024
 	b, _ := skein.New(skein.Skein1024, 1024)
@@ -132,11 +132,10 @@ func SchedBrute(check []byte) {
 	ttrim[1] = '='
 	trimset := string(ttrim)
 	for {
-		/*
 		if count % 1000000 == 0 {
-			fmt.Println(1000000.0 / (float64(time.Now().UnixNano() - t.UnixNano()) / 1000000000.0))
+			fmt.Printf("%f hashes/s\n", 1000000.0 / (float64(time.Now().UnixNano() - t.UnixNano()) / 1000000000.0))
 			t = time.Now()
-		}*/
+		}
 		by := lo.Bytes()
 		base64.StdEncoding.Encode(buff, by)
 		subbuff := bytes.TrimRight(buff, trimset)
