@@ -93,10 +93,23 @@ func DiffFromString(b *skein.Skein, gs , s []byte) int {
 }
 
 func SendToEric(word string, num int) {
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
-	conn, _ := net.DialTCP("tcp", nil,addr)
-	conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
-	conn.Close()
+	for {
+		addr, resolveErr := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
+		if resolveErr == nil {
+			conn, dialErr := net.DialTCP("tcp", nil,addr)
+			if dialErr == nil {
+				conn.Write([]byte(fmt.Sprintf("update;%d;%s", num, word)))
+				conn.Close()
+				break
+			} else {
+				fmt.Println("Error connecting to hobo.")
+				time.Sleep(2 * time.Second)
+			}
+		} else {
+			fmt.Println("Error resolving hobo's address.")
+			time.Sleep(2 * time.Second)
+		}
+	}
 }
 
 func RequestNewRange() (*big.Int, *big.Int) {
