@@ -101,22 +101,31 @@ func SendToEric(word string, num int) {
 
 func RequestNewRange() (*big.Int, *big.Int) {
 	//return big.NewInt(5000000000), big.NewInt(5002000000)
-	addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
-	conn, _ := net.DialTCP("tcp", nil,addr)
-	conn.Write([]byte("ask"))
-	rbuf := make([]byte, 2)
-	conn.Read(rbuf)
-	l := int(rbuf[0]) + (int(rbuf[1]) * 256)
-	m := make([]byte, l)
-	conn.Read(m)
-	conn.Close()
-	rng := strings.Split(string(m),";")
-	lo := big.NewInt(0)
-	lo.SetString(rng[0],10)
-	hi := big.NewInt(0)
-	hi.SetString(rng[1],10)
-	fmt.Printf("Now checking range %s to %s.\n", lo.String(), hi.String())
-	return lo, hi
+
+	for {
+		addr, _ := net.ResolveTCPAddr("tcp","hobosteaux.dyndns.org:9001")
+		conn, _ := net.DialTCP("tcp", nil,addr)
+		conn.Write([]byte("ask"))
+		rbuf := make([]byte, 2)
+		conn.Read(rbuf)
+		l := int(rbuf[0]) + (int(rbuf[1]) * 256)
+		m := make([]byte, l)
+		conn.Read(m)
+		conn.Close()
+		rng := strings.Split(string(m),";")
+		if len(m) < 1 {
+			fmt.Println("Error reading from network, is your comptuer connected to the internet?")
+			time.Sleep(2 * time.Second)
+		} else {
+			lo := big.NewInt(0)
+			lo.SetString(rng[0],10)
+			hi := big.NewInt(0)
+			hi.SetString(rng[1],10)
+			fmt.Printf("Now checking range %s to %s.\n", lo.String(), hi.String())
+			return lo, hi
+		}
+	}
+	return nil, nil
 }
 
 func SchedBrute(check []byte) {
